@@ -7,7 +7,6 @@ import android.graphics.PixelFormat
 import android.os.*
 import android.view.*
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import androidx.appcompat.view.ContextThemeWrapper
 import com.haseeb.recorder.databinding.LayoutRecordingOverlayBinding
 import kotlin.math.abs
@@ -109,7 +108,8 @@ class RecordingOverlayService : Service() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            // FLAG_SECURE has been added here to hide the overlay from the final recording
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_SECURE,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
