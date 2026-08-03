@@ -257,9 +257,9 @@ class ScreenRecordService : Service() {
             val videoFormat = MediaFormat.createVideoFormat(videoMime, screenWidth, screenHeight).apply {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
                 // 3. Set Bitrate to 2.5 Mbps
-                setInteger(MediaFormat.KEY_BIT_RATE, 2500000)
+                setInteger(MediaFormat.KEY_BIT_RATE, 3500000)
                 // 4. Set Framerate to 60 FPS
-                setInteger(MediaFormat.KEY_FRAME_RATE, 60)
+                setInteger(MediaFormat.KEY_FRAME_RATE, 25)
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
                 setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)
             }
