@@ -91,4 +91,9 @@
     <string name="settings_about_app_title">About App</string>
     <string name="settings_about_app_summary">Version, licenses and developer info</string>
 
+    <!-- Developer & Fork Information -->
+    <string name="developer_name">Shovon</string>
+    <string name="github_link">https://github.com/shovon05/ScreenRecorder</string>
+    <string name="fork_details">Forked and optimized by Shovon</string>
+
 </resources>
