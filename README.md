@@ -1,117 +1,34 @@
-<div align="center">
-  <img src="fastlane/metadata/android/en-US/images/icon.png" alt="ScreenRecorder Logo" width="128" />
-  <h1>ScreenRecorder</h1>
+# 📱 Lightweight Screen Recorder (Optimized Fork)
 
-  <p>
-    <a href="https://apt.izzysoft.de/fdroid/index/apk/com.haseeb.recorder">
-      <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" height="60" />
-    </a>
-    <br><br>
-    <a href="https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder/stargazers">
-      <img src="https://img.shields.io/github/stars/muhammadhaseebiqbal-dev/Screen-Recorder?style=for-the-badge&logo=github&color=E3B341" />
-    </a>
-    &nbsp;&nbsp;
-    <a href="https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder/releases">
-      <img src="https://img.shields.io/badge/GitHub-Releases-24292e?style=for-the-badge&logo=github&logoColor=white" />
-    </a>
-    &nbsp;&nbsp;
-    <a href="obtainium://add/https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder">
-      <img src="https://img.shields.io/badge/Get_it_on-Obtainium-297ACC?style=for-the-badge&logo=android&logoColor=white" />
-    </a>
-    &nbsp;&nbsp;
-    <a href="https://www.patreon.com/MuhammadHaseebIqbal/posts/buy-me-coffee-162409817?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link">
-      <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-Support-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" />
-    </a>
-  </p>
+A highly optimized, privacy-focused, and lightweight screen recording application for Android. 
 
-  <p><b>Minimal • Fast • Material 3 Expressive Screen Recorder</b></p>
-</div>
+This repository is a customized fork of the original ScreenRecorder project, heavily modified to prioritize performance, reduce CPU/memory overhead, and eliminate background bloat.
 
----
+## ✨ Key Enhancements & Features
 
-## 📸 Preview
+*   **Zero GC Churn:** Audio encoding loops have been rewritten to prevent Garbage Collection spikes, ensuring buttery-smooth performance.
+*   **Optimized Video Output:** Hardcoded to 25 FPS at 4 Mbps (H.264/AAC) for crystal-clear, professional 1080p video without massive file sizes.
+*   **Maximized Audio Capture:** Bypasses strict audio limitations by capturing `USAGE_UNKNOWN` channels, allowing for the broadest possible system audio recording (Note: Android OS restricts direct VoIP capture; use speakerphone for meetings).
+*   **Invisible Overlay:** Floating controls use `FLAG_SECURE` removal and smart auto-collapsing to stay out of your final video.
+*   **R8 Minification:** Debug bloat has been stripped out, resulting in a tiny, highly efficient `.apk`.
 
-<div align="center">
+## 🚀 How to Download & Install
 
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/home.jpg" width="180"/>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/luancher.jpg" width="180"/>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/about.jpg" width="180"/>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/tile.jpg" width="180"/>
+You don't need Android Studio to compile this app! It builds automatically using GitHub Actions.
 
-<br/>
+1. Go to the [Actions tab](../../actions) in this repository.
+2. Click on the latest successful **Build Android App** workflow.
+3. Scroll down to the **Artifacts** section.
+4. Download the `app-release-unsigned-apk.zip` file.
+5. Extract the zip and install the `.apk` directly to your Android device.
 
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/countdown.jpg" width="180"/>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/window.jpg" width="180"/>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/settings.jpg" width="180"/>
+## 🛠️ Build it Yourself
 
-</div>
+If you wish to fork this project and build it via GitHub Actions:
+1. Fork this repository.
+2. Navigate to the **Actions** tab in your new fork and enable workflows.
+3. Go to the `.github/workflows/build.yml` file and trigger a run.
+4. Download your newly compiled APK from the artifacts!
 
 ---
-
-A modern Android screen recorder built in Kotlin using the `MediaProjection` API.  
-Designed for speed, clarity, and a smooth Material 3 Expressive experience.
-
----
-
-## ✨ Features
-
-- 🎥 Capture your screen in the **highest resolution your device supports**
-- ⏸ Pause anytime and ▶️ resume instantly without breaking the recording
-- 🟢 Floating control pill with quick **Pause • Resume • Stop** actions
-- ⏳ Clean 3-second countdown before recording starts
-- ⚡ Start recording directly from the Quick Settings tile
-- 🎨 Crafted with **Material 3 Expressive UI** for a modern look
-- 📱 Minimal interface focused on usability and clarity
-- 🧩 Lightweight build with efficient memory usage
-- 🗂 Auto-save recordings to `DCIM / ScreenRecorder /`
-- 📦 Uses modern MediaStore API for compatibility
-- 🎬 Smooth and stable recording across devices
-- ℹ️ Clean About screen with app information
-
----
-
-## 🛠️ Build Requirements
-
-- Android Studio (latest recommended)  
-- Android SDK 36  
-- Minimum SDK 26 (Android 8.0)  
-- Gradle 9+  
-- Java 17  
-
----
-
-## ☕ Support
-
-If you enjoy using ScreenRecorder and want to support its continued development, consider buying me a coffee! Every contribution helps keep the app free, ad-free, and actively maintained.
-
-<a href="https://www.patreon.com/MuhammadHaseebIqbal/posts/buy-me-coffee-162409817?utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=postshare_creator&utm_content=join_link">
-  <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-Support-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" />
-</a>
-
----
-
-## 📜 License
-
-```
-MIT License
-
-Copyright (c) 2024 Muhammad Haseeb
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+*Maintained and optimized by [Shovon](https://github.com/shovon05)*
