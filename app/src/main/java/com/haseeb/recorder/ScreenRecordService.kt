@@ -32,6 +32,7 @@ import java.util.*
 /*
  * Professional screen recording service.
  * Dynamically handles resolution scaling and safe automated toggling of device settings.
+ * OPTIMIZED: Audio and Video encoding loops strictly manage memory to prevent GC churn.
  */
 class ScreenRecordService : Service() {
 
@@ -256,9 +257,7 @@ class ScreenRecordService : Service() {
 
             val videoFormat = MediaFormat.createVideoFormat(videoMime, screenWidth, screenHeight).apply {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                // Set Bitrate to 3.5 Mbps
                 setInteger(MediaFormat.KEY_BIT_RATE, 5000000)
-                // Set Framerate to 25 FPS
                 setInteger(MediaFormat.KEY_FRAME_RATE, 25)
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
                 setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)
@@ -419,7 +418,7 @@ class ScreenRecordService : Service() {
             val captureConfig = AudioPlaybackCaptureConfiguration.Builder(mediaProjection!!)
                 .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
                 .addMatchingUsage(AudioAttributes.USAGE_GAME)
-                .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN) // Added to maximize audio capture
+                .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN) 
                 .build()
             val minBuf = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
             sysRecord = AudioRecord.Builder()
@@ -432,6 +431,7 @@ class ScreenRecordService : Service() {
 
     /*
      * Continuously processes and multiplexes audio from system and microphone streams.
+     * OPTIMIZED: ByteBuffer allocation moved outside the loop to prevent aggressive GC churn.
      */
     private fun drainAudioEncoder() {
         val bufferInfo = MediaCodec.BufferInfo()
@@ -441,6 +441,9 @@ class ScreenRecordService : Service() {
         val sysBuf = ShortArray(frameSamples)
         val mixBuf = ShortArray(frameSamples)
         val tmpBytes = ByteArray(frameSamples * 2)
+        
+        // ALLOCATED ONCE OUTSIDE THE LOOP
+        val bb = ByteBuffer.wrap(tmpBytes).order(ByteOrder.LITTLE_ENDIAN)
 
         while (!stopRequested) {
             if (isPaused) {
@@ -459,7 +462,6 @@ class ScreenRecordService : Service() {
                     mixBuf[i] = (mVal + sVal).coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt()).toShort()
                 }
 
-                val bb = ByteBuffer.wrap(tmpBytes).order(ByteOrder.LITTLE_ENDIAN)
                 bb.clear()
                 for (i in 0 until validSamples) bb.putShort(mixBuf[i])
 
