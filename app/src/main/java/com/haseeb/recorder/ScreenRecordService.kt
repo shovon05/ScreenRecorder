@@ -256,9 +256,9 @@ class ScreenRecordService : Service() {
 
             val videoFormat = MediaFormat.createVideoFormat(videoMime, screenWidth, screenHeight).apply {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                // 3. Set Bitrate to 2.5 Mbps
+                // Set Bitrate to 3.5 Mbps
                 setInteger(MediaFormat.KEY_BIT_RATE, 3500000)
-                // 4. Set Framerate to 60 FPS
+                // Set Framerate to 25 FPS
                 setInteger(MediaFormat.KEY_FRAME_RATE, 25)
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
                 setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)
@@ -419,6 +419,7 @@ class ScreenRecordService : Service() {
             val captureConfig = AudioPlaybackCaptureConfiguration.Builder(mediaProjection!!)
                 .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
                 .addMatchingUsage(AudioAttributes.USAGE_GAME)
+                .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN) // Added to maximize audio capture
                 .build()
             val minBuf = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
             sysRecord = AudioRecord.Builder()
