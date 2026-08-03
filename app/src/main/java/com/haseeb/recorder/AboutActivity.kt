@@ -38,27 +38,27 @@ class AboutActivity : AppCompatActivity() {
     }
 
     /**
-     * Prepares list items.
+     * Prepares list items with updated developer and fork details.
      */
     private fun setupRecycler() {
         val items = listOf(
             AboutItem(
-                "Source Code",
+                "Shovon",
+                "Maintainer & Optimizer",
+                "https://github.com/shovon05",
+                Icon.Url("https://github.com/shovon05.png") // Pulls your GitHub avatar automatically
+            ),
+            AboutItem(
+                "Optimized Fork",
                 "View project repository",
-                "https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder",
+                "https://github.com/shovon05/ScreenRecorder",
                 Icon.Drawable(R.drawable.ic_github)
             ),
             AboutItem(
-                "Haseeb Iqbal",
-                "Maintainer",
-                "https://github.com/muhammadhaseebiqbal-dev",
-                Icon.Url("https://github.com/muhammadhaseebiqbal-dev.png")
-            ),
-            AboutItem(
-                "Ameer Muawiya",
-                "Collaborator",
-                "https://github.com/ameermuawiya",
-                Icon.Url("https://github.com/ameermuawiya.png")
+                "Original Project",
+                "By Haseeb Iqbal",
+                "https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder",
+                Icon.Drawable(R.drawable.ic_github)
             )
         )
 
