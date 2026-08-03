@@ -133,15 +133,19 @@ class ScreenRecordService : Service() {
         wm.defaultDisplay.getRealMetrics(metrics)
         screenDensity = metrics.densityDpi
 
-        val physicalMaxRes = configManager.getMaxSupportedResolution()
-        val targetRes = configManager.getScaledResolution()
-        
-        screenWidth = targetRes.first
-        screenHeight = targetRes.second
+        // 1. Get exact mobile display resolution
+        var fullWidth = metrics.widthPixels
+        var fullHeight = metrics.heightPixels
 
-        // Scale the density based on width reduction to prevent UI elements from appearing massive
-        val widthRatio = screenWidth.toFloat() / physicalMaxRes.first.toFloat()
-        scaledDensity = (screenDensity * widthRatio).toInt()
+        // 2. Hardware encoders require dimensions to be even numbers
+        if (fullWidth % 2 != 0) fullWidth -= 1
+        if (fullHeight % 2 != 0) fullHeight -= 1
+
+        screenWidth = fullWidth
+        screenHeight = fullHeight
+
+        // Since we are using full resolution, scaled density is just the actual density
+        scaledDensity = screenDensity
     }
 
     /*
@@ -172,11 +176,6 @@ class ScreenRecordService : Service() {
 
     /*
      * Called when the user swipes the app away from Recents.
-     * Deliberately does NOT stop the recording: android:stopWithTask="false" already
-     * tells the OS not to kill this service for that reason, and this override exists
-     * so that behavior is explicit and easy to find, rather than depending silently on
-     * a manifest default. The foreground notification (and the floating overlay) keep
-     * the process alive and visible to the user for as long as recording is active.
      */
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
@@ -257,8 +256,10 @@ class ScreenRecordService : Service() {
 
             val videoFormat = MediaFormat.createVideoFormat(videoMime, screenWidth, screenHeight).apply {
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-                setInteger(MediaFormat.KEY_BIT_RATE, configManager.getOptimalVideoBitrate())
-                setInteger(MediaFormat.KEY_FRAME_RATE, configManager.videoFps)
+                // 3. Set Bitrate to 2.5 Mbps
+                setInteger(MediaFormat.KEY_BIT_RATE, 2500000)
+                // 4. Set Framerate to 60 FPS
+                setInteger(MediaFormat.KEY_FRAME_RATE, 60)
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
                 setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)
             }
@@ -323,8 +324,7 @@ class ScreenRecordService : Service() {
 
     /*
      * Checks whether there's enough free space on the storage volume to reasonably
-     * expect a usable recording. Errs on the side of allowing recording to proceed
-     * if free space can't be determined, rather than blocking the user unnecessarily.
+     * expect a usable recording.
      */
     private fun hasEnoughFreeSpace(minBytes: Long = MIN_FREE_SPACE_BYTES): Boolean {
         return try {
@@ -338,7 +338,6 @@ class ScreenRecordService : Service() {
 
     /*
      * Safely enables device touch feedback.
-     * Prevents crash if system denies permission without WRITE_SETTINGS enabled.
      */
     private fun applyShowTouchesSettingSafe() {
         if (configManager.showTouches) {
@@ -370,10 +369,6 @@ class ScreenRecordService : Service() {
 
     /*
      * Locks device auto-rotation for the duration of the recording.
-     * The virtual display/encoder are sized once at recording start; if the device
-     * physically rotates mid-recording, the mirrored frames no longer match the
-     * encoder's fixed dimensions and the output video comes out squeezed/corrupted.
-     * Locking rotation avoids that. Silently no-ops without WRITE_SETTINGS permission.
      */
     private fun lockOrientationSafe() {
         try {
@@ -537,9 +532,6 @@ class ScreenRecordService : Service() {
                                 } catch (e: Exception) {
                                     Log.e(TAG, "Muxer write failed: ${e.message}")
                                     consecutiveWriteFailures++
-                                    // Repeated failures usually mean the disk is full or the output
-                                    // volume disappeared (e.g. SD card removed). Stop cleanly and tell
-                                    // the user instead of silently grinding out a corrupt file forever.
                                     if (consecutiveWriteFailures >= MAX_CONSECUTIVE_WRITE_FAILURES && !stopRequested) {
                                         stopRequested = true
                                         mainHandler.post { stopRecordingDueToError(getString(R.string.ScreenRecordService_error_write_failed)) }
@@ -580,10 +572,7 @@ class ScreenRecordService : Service() {
     }
 
     /*
-     * Stops recording in response to an unrecoverable runtime error (e.g. storage full,
-     * output volume disappeared). Finalizes whatever was captured so far so the file
-     * stays playable, then tells the user what happened via a toast, since the
-     * notification is about to disappear along with the foreground service.
+     * Stops recording in response to an unrecoverable runtime error.
      */
     private fun stopRecordingDueToError(reason: String) {
         Log.e(TAG, "Stopping recording due to error: $reason")
@@ -593,13 +582,6 @@ class ScreenRecordService : Service() {
         Toast.makeText(this, reason, Toast.LENGTH_LONG).show()
     }
 
-    /*
-     * Safety net: if this service is torn down for any reason while a recording is still
-     * in progress (process killed, OEM task-manager force-stop, etc.), make a best-effort
-     * attempt to finalize the muxer so the output file isn't left corrupt/unplayable.
-     * This can't catch every termination path (e.g. an abrupt "kill -9"), but it covers
-     * the common ones where onDestroy is still able to run.
-     */
     override fun onDestroy() {
         if (isRecording) {
             Log.w(TAG, "Service being destroyed mid-recording; finalizing file as a safety net")
@@ -631,9 +613,6 @@ class ScreenRecordService : Service() {
         sendBroadcast(Intent(ACTION_STATE_CHANGED).apply { putExtra(EXTRA_STATE, state) })
     }
 
-    /*
-     * Intercepts continuous screen drawing temporarily allowing zero-waste pause mechanisms.
-     */
     private fun pauseRecording() {
         if (!isRecording || isPaused) return
         isPaused = true
@@ -642,9 +621,6 @@ class ScreenRecordService : Service() {
         sendStateBroadcast(STATE_PAUSE)
     }
 
-    /*
-     * Continues display capture sequence avoiding time jump glitches within final output.
-     */
     private fun resumeRecording() {
         if (!isRecording || !isPaused) return
         val resumeTimeUs = System.nanoTime() / 1000
@@ -654,9 +630,6 @@ class ScreenRecordService : Service() {
         sendStateBroadcast(STATE_RESUME)
     }
 
-    /*
-     * Crafts the continuous system notification to prevent OS-level service termination.
-     */
     private fun buildRecordingNotification(): Notification {
         val stopIntent = PendingIntent.getService(this, 0, Intent(this, ScreenRecordService::class.java).apply { action = ACTION_STOP }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val contentIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).apply {
@@ -673,17 +646,11 @@ class ScreenRecordService : Service() {
             .build()
     }
 
-    /*
-     * Generates a modern Notification Channel mandatory for foreground functionality.
-     */
     private fun createNotificationChannel() {
         val channel = NotificationChannel(CHANNEL_ID, getString(R.string.ScreenRecordService_notif_title), NotificationManager.IMPORTANCE_LOW)
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
-    /*
-     * Dynamically verifies codec HEVC compliance on varying target hardware architectures.
-     */
     private fun isH265Supported(): Boolean {
         val list = MediaCodecList(MediaCodecList.REGULAR_CODECS)
         for (info in list.codecInfos) {
