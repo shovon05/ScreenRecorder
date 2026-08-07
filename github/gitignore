@@ -1,0 +1,19 @@
+# Signing secrets — never commit a real release key or its passwords
+keystore.properties
+*.jks
+*.keystore
+keystore/
+
+# Build output
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
